@@ -152,7 +152,7 @@ void BackwardElimination(int totalFeatures)
 
 int main()
 {
-    cout << "Welcome to Feature Selection Algorithm.\n";
+    cout << "Welcome to (Tony Trieu 862275202, Ricardo Galeano 862260629, Daniel Velez 862224861) Feature Selection Algorithm.\n";
     cout << "Please enter total number of features: ";
     int totalFeatures;
     cin >> totalFeatures;
