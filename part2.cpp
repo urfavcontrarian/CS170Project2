@@ -193,17 +193,17 @@ vector<vector<double>> ReadData(const string &filename)
 
 int main()
 {
-    vector<vector<double>> data = ReadData("small-test-dataset.txt");
+    vector<vector<double>> smallData = ReadData("small-test-dataset.txt");
     vector<int> labels;
-    vector<vector<double>> dataL = ReadData("large-test-dataset.txt");
+    vector<vector<double>> largeData = ReadData("large-test-dataset.txt");
     vector<int> labelsL;
 
-    for (const auto &instance : data)
+    for (const auto &instance : smallData)
     {
         labels.push_back(static_cast<int>(instance[0]));
     }
 
-    for (const auto &instance : dataL)
+    for (const auto &instance : largeData)
     {
         labelsL.push_back(static_cast<int>(instance[0]));
     }
@@ -211,8 +211,8 @@ int main()
     vector<size_t> featureSubset = {3, 5, 7};
     vector<size_t> featureSubsetL = {1, 15, 27};
 
-    Validator validator(data, labels);
-    Validator validatorL(dataL, labelsL);
+    Validator validator(smallData, labels);
+    Validator validatorL(largeData, labelsL);
 
     double accuracy = validator.evaluate(featureSubset);
     double accuracyL = validatorL.evaluate(featureSubsetL);
