@@ -43,7 +43,7 @@ public:
         }
 
         double minDistance = numeric_limits<double>::max(); // Initialize to max possible value
-        int nearestLabel = -1;
+        int nearestLabel = trainingLabels[0];
 
         for (size_t i = 0; i < trainingData.size(); i++)
         {
@@ -53,7 +53,6 @@ public:
                 double difference = instance[j] - trainingData[i][j];
                 distance += difference * difference;
             }
-            distance = sqrt(distance);
 
             if (distance < minDistance)
             {
