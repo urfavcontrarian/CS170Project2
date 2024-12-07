@@ -124,9 +124,9 @@ public:
     double evaluate(const vector<size_t> &featureSubset)
     {
         int correctPredictions = 0;
-        int numInstances = normalizedData.size();
+        size_t numInstances = normalizedData.size();
 
-        for (int i = 0; i < numInstances; ++i)
+        for (size_t i = 0; i < numInstances; i++)
         {
             vector<double> instance;
             for (size_t j : featureSubset)
@@ -136,7 +136,7 @@ public:
 
             vector<vector<double>> trainData;
             vector<int> trainLabels;
-            for (int k = 0; k < numInstances; ++k)
+            for (int k = 0; k < numInstances; k++)
             {
                 if (k != i)
                 {
@@ -163,7 +163,7 @@ public:
     }
 };
 
-vector<vector<double>> readData(const string &filename)
+vector<vector<double>> ReadData(const string &filename)
 {
     vector<vector<double>> data;
     ifstream file(filename);
@@ -180,19 +180,23 @@ vector<vector<double>> readData(const string &filename)
             {
                 instance.push_back(value);
             }
-            data.push_back(instance);
+
+            if (!instance.empty())
+            {
+                data.push_back(instance);
+            }
         }
-        file.close();
     }
 
+    file.close();
     return data;
 }
 
 int main()
 {
-    vector<vector<double>> data = readData("small-test-dataset.txt");
+    vector<vector<double>> data = ReadData("small-test-dataset.txt");
     vector<int> labels;
-    vector<vector<double>> dataL = readData("large-test-dataset.txt");
+    vector<vector<double>> dataL = ReadData("large-test-dataset.txt");
     vector<int> labelsL;
 
     for (const auto &instance : data)
@@ -216,6 +220,4 @@ int main()
 
     cout << "Accuracy: " << accuracy << endl;
     cout << "Accuracy for large dataset: " << accuracyL;
-
-    return 0;
 }
