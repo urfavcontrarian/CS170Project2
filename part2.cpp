@@ -156,10 +156,15 @@ public:
 
             classifier->Train(trainData, trainLabels);
             int predictedLabel = classifier->Test(instance);
-
+            cout << "Instance " << i << "Predicted =" << predictedLabel << "; True = " << labels[i];
             if (predictedLabel == labels[i])
             {
                 correctPredictions++;
+                cout << " CORRECT" << endl;
+                
+            }
+            else{
+                cout << " INCORRECT" << endl;
             }
         }
         auto stop = high_resolution_clock::now();
