@@ -91,6 +91,7 @@ public:
 
     vector<vector<double>> normalizeData(const vector<vector<double>> &data)
     {
+        auto start = high_resolution_clock::now();
         vector<vector<double>> normalizedData = data;
         size_t numInstances = data.size();
         size_t numFeatures = data[0].size();
@@ -117,11 +118,15 @@ public:
                 }
             }
         }
+        auto stop = high_resolution_clock::now();
+        auto duration = duration_cast<milliseconds>(stop - start);
+        cout << "Data normalization duration: " << duration.count() << "ms" << endl;
         return normalizedData;
     }
 
     double evaluate(const vector<size_t> &featureSubset)
     {
+        auto start = high_resolution_clock::now();
         int correctPredictions = 0;
         size_t numInstances = normalizedData.size();
 
@@ -157,13 +162,16 @@ public:
                 correctPredictions++;
             }
         }
-
+        auto stop = high_resolution_clock::now();
+        auto duration = duration_cast<milliseconds>(stop - start);
+        cout << "Data validation duration: " << duration.count() << "ms" << endl;
         return (double)correctPredictions / numInstances;
     }
 };
 
 vector<vector<double>> ReadData(const string &filename)
 {
+    auto start = high_resolution_clock::now();
     vector<vector<double>> data;
     ifstream file(filename);
 
@@ -188,6 +196,9 @@ vector<vector<double>> ReadData(const string &filename)
     }
 
     file.close();
+    auto stop = high_resolution_clock::now();
+    auto duration = duration_cast<milliseconds>(stop - start);
+    cout << "Data parsing duration: " << duration.count() << "ms" << endl;
     return data;
 }
 
