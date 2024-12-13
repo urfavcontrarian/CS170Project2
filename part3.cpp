@@ -422,72 +422,69 @@ int main()
                 }
             }
         }
-        else if (algorithmChoice == 2)
-        {
-            // Backward Elimination
-            set<int> currentSet;
-            for (size_t i = 0; i < data[0].size(); i++)
-            {
-                currentSet.insert(i);
+else if (algorithmChoice == 2) {
+    // Backward Elimination with optimization
+    vector<size_t> currentFeatures;
+    // Start with all features but in a vector for faster operations
+    for (size_t i = 0; i < data[0].size(); i++) {
+        currentFeatures.push_back(i);
+    }
+    
+    // Evaluate initial accuracy once
+    bestAccuracy = validator.evaluate(currentFeatures);
+    cout << "\nStarting with all features. Initial accuracy is " 
+         << fixed << setprecision(3) << bestAccuracy << endl;
+
+    while (currentFeatures.size() > k) {
+        int featureToRemove = -1;
+        double bestLocalAcc = 0.0;
+        vector<size_t> testFeatures;
+        
+        // Reserve space to avoid reallocations
+        testFeatures.reserve(currentFeatures.size() - 1);
+
+        for (size_t i = 0; i < currentFeatures.size(); i++) {
+            // Create test set by copying all features except the one we're testing
+            testFeatures.clear();
+            for (size_t j = 0; j < currentFeatures.size(); j++) {
+                if (j != i) {
+                    testFeatures.push_back(currentFeatures[j]);
+                }
             }
-            bestFeatures = currentSet;
-            vector<size_t> allFeatures(currentSet.begin(), currentSet.end());
-            bestAccuracy = validator.evaluate(allFeatures);
 
-            // Show initial accuracy with all features
-            cout << "\nStarting with all features. Initial accuracy is "
-                 << fixed << setprecision(3) << bestAccuracy << endl;
+            double accuracy = validator.evaluate(testFeatures);
+            cout << "Removed feature " << (currentFeatures[i] + 1) 
+                 << ", accuracy: " << fixed << setprecision(3) << accuracy << endl;
 
-            while (currentSet.size() > k)
-            {
-                int featureToRemove = -1;
-                double bestLocalAcc = 0.0;
-
-                for (int feature : currentSet)
-                {
-                    set<int> testSet = currentSet;
-                    testSet.erase(feature);
-                    vector<size_t> testVector(testSet.begin(), testSet.end());
-                    double accuracy = validator.evaluate(testVector);
-
-                    // Show which feature we're testing for removal
-                    cout << "Removing feature " << (feature + 1)
-                         << " gives accuracy: " << fixed << setprecision(3)
-                         << accuracy << endl;
-
-                    if (accuracy > bestLocalAcc)
-                    {
-                        bestLocalAcc = accuracy;
-                        featureToRemove = feature;
-                    }
-                }
-
-                if (featureToRemove != -1)
-                {
-                    currentSet.erase(featureToRemove);
-                    // Show which feature was actually removed and the new feature set
-                    cout << "\nRemoved feature " << (featureToRemove + 1) << endl;
-                    cout << "Current feature set: {";
-                    int count = 0;
-                    for (int f : currentSet)
-                    {
-                        cout << (f + 1);
-                        if (count < currentSet.size() - 1)
-                            cout << ", ";
-                        count++;
-                    }
-                    cout << "} accuracy: " << bestLocalAcc << endl
-                         << endl;
-
-                    if (bestLocalAcc > bestAccuracy)
-                    {
-                        bestAccuracy = bestLocalAcc;
-                        bestFeatures = currentSet;
-                    }
-                }
+            if (accuracy > bestLocalAcc) {
+                bestLocalAcc = accuracy;
+                featureToRemove = i;  // Store index in currentFeatures vector
             }
         }
 
+        if (featureToRemove != -1) {
+            // Remove the feature by its index in our vector
+            cout << "\nPermanently removed feature " << (currentFeatures[featureToRemove] + 1) << endl;
+            currentFeatures.erase(currentFeatures.begin() + featureToRemove);
+
+            if (bestLocalAcc > bestAccuracy) {
+                bestAccuracy = bestLocalAcc;
+                // Convert to set only when updating best features
+                bestFeatures.clear();
+                for (size_t feature : currentFeatures) {
+                    bestFeatures.insert(feature);
+                }
+            }
+
+            cout << "Current feature set: {";
+            for (size_t i = 0; i < currentFeatures.size(); i++) {
+                cout << (currentFeatures[i] + 1);
+                if (i < currentFeatures.size() - 1) cout << ", ";
+            }
+            cout << "} accuracy: " << bestLocalAcc << endl << endl;
+        }
+    }
+}
         // Display final results
         cout << "\nResults for " << datasetName << " Dataset:\n";
         cout << "Best Feature Subset: {";
