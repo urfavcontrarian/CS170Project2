@@ -12,44 +12,53 @@
 using namespace std;
 
 // The NearestNeighborClassifier implements core classification functionality
-class NearestNeighborClassifier {
+class NearestNeighborClassifier
+{
 private:
     vector<vector<double>> trainingData;
     vector<int> trainingLabels;
 
 public:
-    void Train(const vector<vector<double>>& instances, const vector<int>& labels) {
+    void Train(const vector<vector<double>> &instances, const vector<int> &labels)
+    {
         trainingData = instances;
         trainingLabels = labels;
     }
 
-    void TrainWithIDs(const vector<int>& instanceIDs,
-        const vector<vector<double>>& fullDataset,
-        const vector<int>& allLabels) {
+    void TrainWithIDs(const vector<int> &instanceIDs,
+                      const vector<vector<double>> &fullDataset,
+                      const vector<int> &allLabels)
+    {
         trainingData.clear();
         trainingLabels.clear();
-        for (int id : instanceIDs) {
+        for (int id : instanceIDs)
+        {
             trainingData.push_back(fullDataset[id]);
             trainingLabels.push_back(allLabels[id]);
         }
     }
 
-    int Test(const vector<double>& instance) const {
-        if (trainingData.empty()) {
+    int Test(const vector<double> &instance) const
+    {
+        if (trainingData.empty())
+        {
             throw runtime_error("Classifier must be trained before testing!");
         }
 
         double minDistance = numeric_limits<double>::max();
         int nearestLabel = trainingLabels[0];
 
-        for (size_t i = 0; i < trainingData.size(); i++) {
+        for (size_t i = 0; i < trainingData.size(); i++)
+        {
             double distance = 0.0;
-            for (size_t j = 0; j < instance.size(); j++) {
+            for (size_t j = 0; j < instance.size(); j++)
+            {
                 double difference = instance[j] - trainingData[i][j];
                 distance += difference * difference;
             }
 
-            if (distance < minDistance) {
+            if (distance < minDistance)
+            {
                 minDistance = distance;
                 nearestLabel = trainingLabels[i];
             }
@@ -58,49 +67,58 @@ public:
         return nearestLabel;
     }
 
-    int TestWithID(int instanceID, const vector<vector<double>>& fullDataset) const {
+    int TestWithID(int instanceID, const vector<vector<double>> &fullDataset) const
+    {
         return Test(fullDataset[instanceID]);
     }
 };
 
 // The Validator class handles data preprocessing and evaluation
-class Validator {
+class Validator
+{
 private:
     vector<vector<double>> normalizedData;
     vector<int> labels;
-    NearestNeighborClassifier* classifier;
+    NearestNeighborClassifier *classifier;
 
     // Prevent implicit copying
-    Validator(const Validator&) = delete;
-    Validator& operator=(const Validator&) = delete;
+    Validator(const Validator &) = delete;
+    Validator &operator=(const Validator &) = delete;
 
 public:
-    Validator(const vector<vector<double>>& data, const vector<int>& labels) {
+    Validator(const vector<vector<double>> &data, const vector<int> &labels)
+    {
         this->normalizedData = normalizeData(data);
         this->labels = labels;
         classifier = new NearestNeighborClassifier();
     }
 
-    ~Validator() {
+    ~Validator()
+    {
         delete classifier;
     }
 
-    vector<vector<double>> normalizeData(const vector<vector<double>>& data) {
+    vector<vector<double>> normalizeData(const vector<vector<double>> &data)
+    {
         vector<vector<double>> normalizedData = data;
         size_t numInstances = data.size();
         size_t numFeatures = data[0].size();
 
-        for (size_t j = 0; j < numFeatures; ++j) {
+        for (size_t j = 0; j < numFeatures; ++j)
+        {
             double minVal = data[0][j];
             double maxVal = data[0][j];
 
-            for (size_t i = 0; i < numInstances; ++i) {
+            for (size_t i = 0; i < numInstances; ++i)
+            {
                 minVal = min(minVal, data[i][j]);
                 maxVal = max(maxVal, data[i][j]);
             }
 
-            if (maxVal > minVal) {
-                for (size_t i = 0; i < numInstances; ++i) {
+            if (maxVal > minVal)
+            {
+                for (size_t i = 0; i < numInstances; ++i)
+                {
                     normalizedData[i][j] = (data[i][j] - minVal) / (maxVal - minVal);
                 }
             }
@@ -108,23 +126,29 @@ public:
         return normalizedData;
     }
 
-    double evaluate(const vector<size_t>& featureSubset) {
+    double evaluate(const vector<size_t> &featureSubset)
+    {
         int correctPredictions = 0;
         size_t numInstances = normalizedData.size();
 
         // Perform leave-one-out cross validation
-        for (size_t i = 0; i < numInstances; i++) {
+        for (size_t i = 0; i < numInstances; i++)
+        {
             vector<double> instance;
-            for (size_t j : featureSubset) {
+            for (size_t j : featureSubset)
+            {
                 instance.push_back(normalizedData[i][j]);
             }
 
             vector<vector<double>> trainData;
             vector<int> trainLabels;
-            for (int k = 0; k < numInstances; k++) {
-                if (k != i) {
+            for (int k = 0; k < numInstances; k++)
+            {
+                if (k != i)
+                {
                     vector<double> trainInstance;
-                    for (size_t j : featureSubset) {
+                    for (size_t j : featureSubset)
+                    {
                         trainInstance.push_back(normalizedData[k][j]);
                     }
                     trainData.push_back(trainInstance);
@@ -134,7 +158,8 @@ public:
 
             classifier->Train(trainData, trainLabels);
             int predictedLabel = classifier->Test(instance);
-            if (predictedLabel == labels[i]) {
+            if (predictedLabel == labels[i])
+            {
                 correctPredictions++;
             }
         }
@@ -142,54 +167,64 @@ public:
         return static_cast<double>(correctPredictions) / numInstances;
     }
 
-    size_t getNumFeatures() const {
+    size_t getNumFeatures() const
+    {
         return normalizedData[0].size();
     }
 };
 
 // Handles reading different dataset formats
-vector<vector<double>> ReadData(const string& fileName) {
+vector<vector<double>> ReadData(const string &fileName)
+{
     vector<vector<double>> data;
     ifstream file(fileName);
 
-    if (!file) {
+    if (!file)
+    {
         throw runtime_error("Cannot open file: " + fileName);
     }
 
     // First, check if this is a Titanic dataset by fileName
     bool isTitanic = (fileName == "titanic.txt" || fileName == "titanic-clean.txt");
 
-    if (isTitanic) {
+    if (isTitanic)
+    {
         // Handle Titanic format specifically
         vector<double> allValues;
         double value;
 
-        while (file >> value) {
+        while (file >> value)
+        {
             allValues.push_back(value);
         }
 
         // Process values in groups of 7
-        for (size_t i = 0; i < allValues.size(); i += 7) {
-            if (i + 6 < allValues.size()) {
+        for (size_t i = 0; i < allValues.size(); i += 7)
+        {
+            if (i + 6 < allValues.size())
+            {
                 vector<double> instance(allValues.begin() + i, allValues.begin() + i + 7);
                 data.push_back(instance);
             }
         }
 
         cout << "\nTitanic Dataset Features:\n"
-            << "1. Passenger Class (1-3)\n"
-            << "2. Sex (1 = male, 2 = female)\n"
-            << "3. Age\n"
-            << "4. Number of Siblings/Spouses\n"
-            << "5. Number of Parents/Children\n"
-            << "6. Fare\n";
+             << "1. Passenger Class (1-3)\n"
+             << "2. Sex (1 = male, 2 = female)\n"
+             << "3. Age\n"
+             << "4. Number of Siblings/Spouses\n"
+             << "5. Number of Parents/Children\n"
+             << "6. Fare\n";
     }
-    else {
+    else
+    {
         // Handle standard format (scientific notation)
         string line;
-        while (getline(file, line)) {
+        while (getline(file, line))
+        {
             // Skip empty lines
-            if (line.empty() || line.find_first_not_of(" \t") == string::npos) {
+            if (line.empty() || line.find_first_not_of(" \t") == string::npos)
+            {
                 continue;
             }
 
@@ -198,38 +233,44 @@ vector<vector<double>> ReadData(const string& fileName) {
             double value;
 
             // Keep reading values until we can't read anymore
-            while (iss >> value) {
+            while (iss >> value)
+            {
                 instance.push_back(value);
             }
 
             // Only add non-empty instances
-            if (!instance.empty()) {
+            if (!instance.empty())
+            {
                 data.push_back(instance);
             }
         }
     }
 
-    if (data.empty()) {
+    if (data.empty())
+    {
         throw runtime_error("No valid data found in file");
     }
 
     // Verify all instances have the same number of values
     size_t numValues = data[0].size();
-    for (size_t i = 1; i < data.size(); i++) {
-        if (data[i].size() != numValues) {
+    for (size_t i = 1; i < data.size(); i++)
+    {
+        if (data[i].size() != numValues)
+        {
             throw runtime_error("Inconsistent number of values across instances");
         }
     }
 
     cout << "Read " << data.size() << " instances with "
-        << data[0].size() << " values each\n";
+         << data[0].size() << " values each\n";
 
     return data;
 }
 
-
-int main() {
-    try {
+int main()
+{
+    try
+    {
         cout << "Welcome to the Feature Selection Program\n\n";
         cout << "Which dataset would you like to analyze?\n";
         cout << "1. Small Dataset (100 instances, 10 features)\n";
@@ -241,16 +282,17 @@ int main() {
         string fileName;
         int maxFeatures;
         string datasetName;
-        int k;  // Number of features to select
+        int k; // Number of features to select
 
         // Set parameters based on dataset choice
-        switch (choice) {
+        switch (choice)
+        {
         case 1:
             cout << "Enter filename for small dataset: ";
             cin >> fileName;
             maxFeatures = 10;
             datasetName = "Small";
-            k = 3;  // Force 3 features for small dataset
+            k = 3; // Force 3 features for small dataset
             cout << "\nSearching for best subset of 3 features...\n";
             break;
         case 2:
@@ -258,7 +300,7 @@ int main() {
             cin >> fileName;
             maxFeatures = 40;
             datasetName = "Large";
-            k = 3;  // Force 3 features for large dataset
+            k = 3; // Force 3 features for large dataset
             cout << "\nSearching for best subset of 3 features...\n";
             break;
         case 3:
@@ -268,7 +310,8 @@ int main() {
             datasetName = "Titanic";
             cout << "\nHow many features would you like to select (1-" << maxFeatures << "): ";
             cin >> k;
-            if (k < 1 || k > maxFeatures) {
+            if (k < 1 || k > maxFeatures)
+            {
                 throw runtime_error("Invalid number of features specified");
             }
             break;
@@ -287,18 +330,22 @@ int main() {
         vector<int> labels;
 
         // Extract labels and remove them from features
-        for (const vector<double>& instance : data) {
+        for (const vector<double> &instance : data)
+        {
             labels.push_back(static_cast<int>(instance[0]));
         }
-        for (vector<double>& instance : data) {
+        for (vector<double> &instance : data)
+        {
             instance.erase(instance.begin());
         }
 
         // Verify dataset dimensions
-        if (choice == 1 && data.size() != 100) {
+        if (choice == 1 && data.size() != 100)
+        {
             throw runtime_error("Small dataset must have exactly 100 instances");
         }
-        if (choice == 2 && data.size() != 1000) {
+        if (choice == 2 && data.size() != 1000)
+        {
             throw runtime_error("Large dataset must have exactly 1000 instances");
         }
 
@@ -307,63 +354,92 @@ int main() {
         set<int> bestFeatures;
         double bestAccuracy = 0.0;
 
-        if (algorithmChoice == 1) {
-            // Forward Selection
-            set<int> currentSet;
-            while (currentSet.size() < k) {
+        if (algorithmChoice == 1)
+        {
+            // Forward Selection with ordered output
+            vector<size_t> currentFeatures; // Use vector instead of set for controlled ordering
+            while (currentFeatures.size() < k)
+            {
                 int bestFeature = -1;
                 double bestLocalAcc = 0.0;
 
                 // Try adding each unused feature
-                for (size_t i = 0; i < data[0].size(); i++) {
-                    if (currentSet.find(i) == currentSet.end()) {
-                        vector<size_t> testSet;
-                        for (int feature : currentSet) {
-                            testSet.push_back(feature);
-                        }
-                        testSet.push_back(i);
+                for (size_t i = 0; i < data[0].size(); i++)
+                {
+                    // Check if feature i is already selected
+                    if (find(currentFeatures.begin(), currentFeatures.end(), i) == currentFeatures.end())
+                    {
+                        vector<size_t> testFeatures = currentFeatures;  // Copy current features
+                        testFeatures.push_back(i);                      // Add new feature
+                        sort(testFeatures.begin(), testFeatures.end()); // Keep sorted order
 
-                        double acc = validator.evaluate(testSet);
+                        double acc = validator.evaluate(testFeatures);
                         cout << "Using feature(s) {";
-                        for (size_t j = 0; j < testSet.size(); j++) {
-                            cout << (testSet[j] + 1);
-                            if (j < testSet.size() - 1) cout << ",";
+                        for (size_t j = 0; j < testFeatures.size(); j++)
+                        {
+                            cout << (testFeatures[j] + 1);
+                            if (j < testFeatures.size() - 1)
+                                cout << ",";
                         }
                         cout << "} accuracy is " << fixed << setprecision(3) << acc << endl;
 
-                        if (acc > bestLocalAcc) {
+                        if (acc > bestLocalAcc)
+                        {
                             bestLocalAcc = acc;
                             bestFeature = i;
                         }
                     }
                 }
 
-                if (bestFeature != -1) {
-                    currentSet.insert(bestFeature);
-                    if (bestLocalAcc > bestAccuracy) {
+                if (bestFeature != -1)
+                {
+                    currentFeatures.push_back(bestFeature);
+                    sort(currentFeatures.begin(), currentFeatures.end()); // Maintain sorted order
+
+                    if (bestLocalAcc > bestAccuracy)
+                    {
                         bestAccuracy = bestLocalAcc;
-                        bestFeatures = currentSet;
+                        bestFeatures.clear();
+                        // Convert sorted vector to set
+                        for (size_t feature : currentFeatures)
+                        {
+                            bestFeatures.insert(feature);
+                        }
                     }
-                    else {
+                    else
+                    {
                         cout << "Warning! Accuracy has decreased!\n";
                     }
+
+                    cout << "Feature set {";
+                    for (size_t j = 0; j < currentFeatures.size(); j++)
+                    {
+                        cout << (currentFeatures[j] + 1);
+                        if (j < currentFeatures.size() - 1)
+                            cout << ",";
+                    }
+                    cout << "} was best, accuracy is " << fixed << setprecision(3) << bestLocalAcc << endl;
                 }
             }
         }
-        else if (algorithmChoice == 2) {
+        else if (algorithmChoice == 2)
+        {
             // Backward Elimination
             set<int> currentSet;
-            for (size_t i = 0; i < data[0].size(); i++) {
+            for (size_t i = 0; i < data[0].size(); i++)
+            {
                 currentSet.insert(i);
             }
             bestFeatures = currentSet;
             vector<size_t> allFeatures(currentSet.begin(), currentSet.end());
             bestAccuracy = validator.evaluate(allFeatures);
-            while (currentSet.size() > k) {
+            while (currentSet.size() > k)
+            {
                 int featureToRemove = -1;
                 double bestLocalAcc = 0.0;
 
-                for (int feature : currentSet) {
+                for (int feature : currentSet)
+                {
                     set<int> testSet = currentSet;
                     testSet.erase(feature);
                     vector<size_t> testVector(testSet.begin(), testSet.end());
@@ -371,26 +447,32 @@ int main() {
 
                     cout << "Using feature(s) {";
                     bool first = true;
-                    for (int f : testSet) {
-                        if (!first) cout << ",";
+                    for (int f : testSet)
+                    {
+                        if (!first)
+                            cout << ",";
                         cout << (f + 1);
                         first = false;
                     }
                     cout << "} accuracy is " << fixed << setprecision(3) << accuracy << endl;
 
-                    if (accuracy > bestLocalAcc) {
+                    if (accuracy > bestLocalAcc)
+                    {
                         bestLocalAcc = accuracy;
                         featureToRemove = feature;
                     }
                 }
 
-                if (featureToRemove != -1) {
+                if (featureToRemove != -1)
+                {
                     currentSet.erase(featureToRemove);
-                    if (bestLocalAcc > bestAccuracy) {
+                    if (bestLocalAcc > bestAccuracy)
+                    {
                         bestAccuracy = bestLocalAcc;
                         bestFeatures = currentSet;
                     }
-                    else {
+                    else
+                    {
                         cout << "Warning! Accuracy has decreased!\n";
                     }
                 }
@@ -401,23 +483,27 @@ int main() {
         cout << "\nResults for " << datasetName << " Dataset:\n";
         cout << "Best Feature Subset: {";
         int count = 0;
-        for (int feature : bestFeatures) {
-            cout << (feature + 1);  // Convert to 1-based indexing for display
-            if (count < bestFeatures.size() - 1) cout << ", ";
+        for (int feature : bestFeatures)
+        {
+            cout << (feature + 1); // Convert to 1-based indexing for display
+            if (count < bestFeatures.size() - 1)
+                cout << ", ";
             count++;
         }
         cout << "}\nAccuracy: " << fixed << setprecision(3) << bestAccuracy << "\n";
 
         // Show reference accuracies for small and large datasets
-        if (choice == 1) {
+        if (choice == 1)
+        {
             cout << "\nReference: Should find features {3, 5, 7} with accuracy ~0.89\n";
         }
-        else if (choice == 2) {
+        else if (choice == 2)
+        {
             cout << "\nReference: Should find features {1, 15, 27} with accuracy ~0.949\n";
         }
-
     }
-    catch (const exception& e) {
+    catch (const exception &e)
+    {
         cerr << "Error: " << e.what() << endl;
         exit(1);
     }
