@@ -433,6 +433,11 @@ int main()
             bestFeatures = currentSet;
             vector<size_t> allFeatures(currentSet.begin(), currentSet.end());
             bestAccuracy = validator.evaluate(allFeatures);
+
+            // Show initial accuracy with all features
+            cout << "\nStarting with all features. Initial accuracy is "
+                 << fixed << setprecision(3) << bestAccuracy << endl;
+
             while (currentSet.size() > k)
             {
                 int featureToRemove = -1;
@@ -445,16 +450,10 @@ int main()
                     vector<size_t> testVector(testSet.begin(), testSet.end());
                     double accuracy = validator.evaluate(testVector);
 
-                    cout << "Using feature(s) {";
-                    bool first = true;
-                    for (int f : testSet)
-                    {
-                        if (!first)
-                            cout << ",";
-                        cout << (f + 1);
-                        first = false;
-                    }
-                    cout << "} accuracy is " << fixed << setprecision(3) << accuracy << endl;
+                    // Show which feature we're testing for removal
+                    cout << "Removing feature " << (feature + 1)
+                         << " gives accuracy: " << fixed << setprecision(3)
+                         << accuracy << endl;
 
                     if (accuracy > bestLocalAcc)
                     {
@@ -466,14 +465,24 @@ int main()
                 if (featureToRemove != -1)
                 {
                     currentSet.erase(featureToRemove);
+                    // Show which feature was actually removed and the new feature set
+                    cout << "\nRemoved feature " << (featureToRemove + 1) << endl;
+                    cout << "Current feature set: {";
+                    int count = 0;
+                    for (int f : currentSet)
+                    {
+                        cout << (f + 1);
+                        if (count < currentSet.size() - 1)
+                            cout << ", ";
+                        count++;
+                    }
+                    cout << "} accuracy: " << bestLocalAcc << endl
+                         << endl;
+
                     if (bestLocalAcc > bestAccuracy)
                     {
                         bestAccuracy = bestLocalAcc;
                         bestFeatures = currentSet;
-                    }
-                    else
-                    {
-                        cout << "Warning! Accuracy has decreased!\n";
                     }
                 }
             }
