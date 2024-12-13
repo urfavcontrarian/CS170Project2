@@ -246,7 +246,7 @@ int main() {
         // Set parameters based on dataset choice
         switch (choice) {
         case 1:
-            cout << "Enter fileName for small dataset: ";
+            cout << "Enter filename for small dataset: ";
             cin >> fileName;
             maxFeatures = 10;
             datasetName = "Small";
@@ -254,7 +254,7 @@ int main() {
             cout << "\nSearching for best subset of 3 features...\n";
             break;
         case 2:
-            cout << "Enter fileName for large dataset: ";
+            cout << "Enter filename for large dataset: ";
             cin >> fileName;
             maxFeatures = 40;
             datasetName = "Large";
