@@ -314,6 +314,35 @@ int main()
             {
                 throw runtime_error("Invalid number of features specified");
             }
+        case 4:
+            cout << "Enter filename for custom dataset: ";
+            cin >> fileName;
+            datasetName = "Custom";
+
+            // Read data first to determine feature count
+            data = ReadData(fileName);  // Initial read for custom dataset
+            if (data.empty()) {
+                throw runtime_error("Empty dataset provided");
+            }
+
+            // Calculate maxFeatures (subtract 1 for class label column)
+            maxFeatures = static_cast<int>(data[0].size() - 1);
+
+            cout << "\nDataset has " << maxFeatures << " features and "
+                << data.size() << " instances\n";
+            cout << "How many features would you like to select (1-" << maxFeatures << "): ";
+            cin >> k;
+            if (k < 1 || k > maxFeatures) {
+                throw runtime_error("Invalid number of features specified");
+            }
+            break;
+
+        default:
+            throw runtime_error("Invalid dataset choice");
+        }
+
+        data = ReadData(fileName);
+            
             break;
         default:
             throw runtime_error("Invalid dataset choice");
